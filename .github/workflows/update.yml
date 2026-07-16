@@ -1,0 +1,37 @@
+name: update
+
+on:
+  schedule:
+    - cron: "0 21 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-zabrze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@v16
+      - name: Bump zabrze version and hashes
+        run: nix run nixpkgs#nix-update -- --flake zabrze
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GH_PAT }}
+          branch: update/zabrze
+          commit-message: "chore: update zabrze"
+          title: "chore: update zabrze"
+          delete-branch: true
+
+  update-flake-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@v16
+      - uses: DeterminateSystems/update-flake-lock@v24
+        with:
+          token: ${{ secrets.GH_PAT }}
+          branch: update/flake-lock
+          pr-title: "chore: update flake.lock"
