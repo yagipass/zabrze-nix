@@ -54,6 +54,49 @@
                 touch $out
               '';
 
+          expansion =
+            pkgs.runCommandLocal "zabrze-expands-abbreviations" { nativeBuildInputs = [ pkgs.zsh ]; }
+              ''
+                export XDG_CONFIG_HOME=$PWD/config
+                export ZABRZE=${lib.getExe zabrze}
+                mkdir -p "$XDG_CONFIG_HOME/zabrze"
+
+                cat > "$XDG_CONFIG_HOME/zabrze/config.yaml" <<'EOF'
+                abbrevs:
+                  - name: git
+                    abbr: g
+                    snippet: git
+                EOF
+
+                cat > expand-test.zsh <<'EOF'
+                set -eu
+
+                expect_expansion() {
+                  LBUFFER=$1
+                  RBUFFER=
+                  eval "$("$ZABRZE" expand -l "$LBUFFER" -r "$RBUFFER")"
+                  if [[ $LBUFFER != "$2" ]]; then
+                    print -ru2 "expand '$1': expected LBUFFER='$2', got '$LBUFFER'"
+                    exit 1
+                  fi
+                  if [[ -n $RBUFFER ]]; then
+                    print -ru2 "expand '$1': expected empty RBUFFER, got '$RBUFFER'"
+                    exit 1
+                  fi
+                }
+
+                expect_expansion g git
+
+                # Anything but a bare abbreviation in command position must be
+                # left alone, otherwise the plugin would corrupt ordinary input.
+                expect_expansion "echo g" "echo g"
+                expect_expansion gg gg
+                EOF
+
+                zsh expand-test.zsh
+                touch $out
+              '';
+
           formatting = pkgs.runCommandLocal "check-nix-formatting" { nativeBuildInputs = [ pkgs.nixfmt ]; } ''
             find ${nixFiles} -name '*.nix' -print0 | xargs -0 nixfmt --check
             touch $out
