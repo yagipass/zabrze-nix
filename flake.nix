@@ -25,16 +25,41 @@
         default = zabrze;
       });
 
-      # Builds zabrze against the consumer's nixpkgs (`final`), so dependencies
-      # are shared with their system. Unlike the flake packages, the binary
-      # cache only hits when the consumer's nixpkgs revision matches ours.
       overlays.default = final: _prev: {
         zabrze = final.callPackage ./package.nix { };
       };
 
-      checks = eachSystem (pkgs: {
-        zabrze = self.packages.${pkgs.stdenv.hostPlatform.system}.zabrze;
-      });
+      checks = eachSystem (
+        pkgs:
+        let
+          inherit (pkgs) lib;
+          zabrze = self.packages.${pkgs.stdenv.hostPlatform.system}.zabrze;
+          nixFiles = lib.fileset.toSource {
+            root = ./.;
+            fileset = lib.fileset.fileFilter (file: file.hasExt "nix") ./.;
+          };
+        in
+        {
+          # The build workflow only runs `nix flake check`, so this check is what
+          # builds the package pushed to Cachix. Do not remove it.
+          inherit zabrze;
+
+          overlay = (pkgs.extend self.overlays.default).zabrze;
+
+          init-script =
+            pkgs.runCommandLocal "zabrze-init-is-valid-zsh" { nativeBuildInputs = [ pkgs.zsh ]; }
+              ''
+                ${lib.getExe zabrze} init --bind-keys > init.zsh
+                zsh -n init.zsh
+                touch $out
+              '';
+
+          formatting = pkgs.runCommandLocal "check-nix-formatting" { nativeBuildInputs = [ pkgs.nixfmt ]; } ''
+            find ${nixFiles} -name '*.nix' -print0 | xargs -0 nixfmt --check
+            touch $out
+          '';
+        }
+      );
 
       formatter = eachSystem (pkgs: pkgs.nixfmt-tree);
     };
