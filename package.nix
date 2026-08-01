@@ -1,8 +1,8 @@
-# version / hash / cargoHash は nix-update で更新する(update workflow が週次で実行)。
 {
   lib,
   rustPlatform,
   fetchFromGitHub,
+  versionCheckHook,
 }:
 
 rustPlatform.buildRustPackage rec {
@@ -19,6 +19,10 @@ rustPlatform.buildRustPackage rec {
   cargoHash = "sha256-9UZSOXTWvX9jPE0crGb/hUpemuVhEGgyzs+HL3QwIgg=";
 
   cargoTestFlags = [ "--bins" ];
+
+  doInstallCheck = true;
+  nativeInstallCheckInputs = [ versionCheckHook ];
+  versionCheckProgramArg = "--version";
 
   meta = {
     description = "ZSH abbreviation expansion plugin";
