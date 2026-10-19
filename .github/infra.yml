@@ -51,8 +51,8 @@ spec:
     color: ffffff
   features:
     issues: true
-    projects: true
-    wiki: true
+    projects: false
+    wiki: false
     discussions: false
     pull_requests: true
   merge_strategy:
