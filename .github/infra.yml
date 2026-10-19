@@ -3,6 +3,8 @@ kind: Repository
 metadata:
   name: zabrze-nix
   owner: yagipass
+reconcile:
+  rulesets: authoritative
 spec:
   description: Nix flake for zabrze, a zsh abbreviation expansion plugin, with prebuilt binaries on Cachix
   visibility: public
@@ -71,14 +73,12 @@ spec:
     automated_security_fixes: false
     private_vulnerability_reporting: false
   rulesets:
-  - name: main
+  - name: protect-main
     target: branch
     enforcement: active
     bypass_actors:
-    - role: maintain
-      bypass_mode: always
     - role: admin
-      bypass_mode: always
+      bypass_mode: pull_request
     conditions:
       ref_name:
         include:
@@ -86,15 +86,22 @@ spec:
     rules:
       pull_request:
         required_approving_review_count: 0
-        dismiss_stale_reviews_on_push: true
+        dismiss_stale_reviews_on_push: false
         require_code_owner_review: false
         require_last_push_approval: false
         required_review_thread_resolution: false
+      required_status_checks:
+        strict_required_status_checks_policy: false
+        contexts:
+        - context: build (ubuntu-latest)
+          app: github-actions
+        - context: build (macos-latest)
+          app: github-actions
       non_fast_forward: true
-      update: true
+      update: false
       deletion: true
-      creation: true
-      required_linear_history: true
+      creation: false
+      required_linear_history: false
       required_signatures: false
   actions:
     enabled: true
