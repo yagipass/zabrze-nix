@@ -67,7 +67,7 @@ spec:
     merge_commit_message: PR_TITLE
   release_immutability: false
   security:
-    vulnerability_alerts: false
+    vulnerability_alerts: true
     automated_security_fixes: false
     private_vulnerability_reporting: false
   rulesets:
