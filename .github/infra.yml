@@ -6,11 +6,10 @@ metadata:
 reconcile:
   rulesets: authoritative
 spec:
-  description: Nix flake for zabrze, a zsh abbreviation expansion plugin, with prebuilt binaries on Cachix
+  description: "No longer maintained: Nix flake for zabrze, a zsh abbreviation expansion plugin"
   visibility: public
-  archived: false
+  archived: true
   topics:
-  - cachix
   - nix
   - nix-flake
   - nixos

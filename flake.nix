@@ -1,13 +1,6 @@
 {
   description = "Nix flake packaging zabrze, a zsh abbreviation expansion plugin";
 
-  nixConfig = {
-    extra-substituters = [ "https://zabrze-nix.cachix.org" ];
-    extra-trusted-public-keys = [
-      "zabrze-nix.cachix.org-1:X36vl+otCAj6rchY63NSY16K/xbyiChWm5gVKtaY0Rg="
-    ];
-  };
-
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
   outputs =
